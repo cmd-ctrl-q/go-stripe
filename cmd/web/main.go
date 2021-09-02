@@ -78,4 +78,9 @@ func main() {
 	}
 
 	// initialize web server
+	err := app.serve()
+	if err != nil {
+		app.errorLog.Println(err)
+		log.Fatal(err)
+	}
 }
