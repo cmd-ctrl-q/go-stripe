@@ -64,6 +64,14 @@
         const processing = document.getElementById("processing-payment"); 
 
         stripe = Stripe('pk_test_51JWDTpE5YxZNOZuL0hqaIoDxQcBJ7ckriarDeffN1bOinmWZUg9LfdGAAC1KzLh6l8dfyhIvl5dVmmlwQu9I9zD700uordftgb');
+
+        function hidePayButton() {
+            // prevent creditcard from processing twice
+            payButton.classList.add("d-none");
+            // hide spinner
+            processing.classList.remove("d-none"); 
+        }
+
         function val() {
             let form = document.getElementById("charge_form");
             if (form.checkValidity() === false) {
@@ -73,6 +81,7 @@
                 return; 
             }
             form.classList.add("was-validated");
+            hidePayButton();
         }
 
         (function() {
