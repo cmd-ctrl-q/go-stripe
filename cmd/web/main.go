@@ -58,8 +58,16 @@ func main() {
 	flag.StringVar(&cfg.api, "api", "http://localhost:4001", "URL to api")
 	flag.Parse()
 
-	cfg.stripe.key = os.Getenv("STRIPE_KEY")
-	cfg.stripe.secret = os.Getenv("STRIPE_SECRET")
+	key := os.Getenv("STRIPE_KEY")
+	secret := os.Getenv("STRIPE_SECRET")
+	log.Println(key)
+	log.Println(secret)
+	if key == "" || secret == "" {
+		log.Panic("Stripe key or secret is empty. (Possible fixes: .air.toml, Makefile, local env variables)")
+	}
+
+	cfg.stripe.key = key
+	cfg.stripe.secret = secret
 
 	// set up loggers
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
