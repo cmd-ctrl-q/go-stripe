@@ -68,7 +68,7 @@
         const payButton = document.getElementById("pay-button"); 
         const processing = document.getElementById("processing-payment"); 
 
-        stripe = Stripe('pk_test_51JWDTpE5YxZNOZuL0hqaIoDxQcBJ7ckriarDeffN1bOinmWZUg9LfdGAAC1KzLh6l8dfyhIvl5dVmmlwQu9I9zD700uordftgb');
+        stripe = Stripe("{{index .StringMap "publishable_key"}}");
 
         function hidePayButton() {
             // prevent creditcard from processing twice
@@ -125,7 +125,7 @@
                 body: JSON.stringify(payload),
             }
 
-            fetch("http://localhost:4001/api/payment-intent", requestOptions)
+            fetch("{{.API}}/api/payment-intent", requestOptions)
                 .then(response => response.text())
                 .then(response => {
                     let data; 
