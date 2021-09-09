@@ -1,13 +1,11 @@
 package main
 
 import (
-	"log"
 	"net/http"
 )
 
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
-	log.Println("publishable_key=", app.config.stripe.key)
 	stringMap["publishable_key"] = app.config.stripe.key
 
 	if err := app.renderTemplate(w, r, "terminal", &templateData{
@@ -45,5 +43,13 @@ func (app *application) PaymentSucceed(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		app.errorLog.Println(err)
 		return
+	}
+}
+
+// ChargeOnce displays the page to buy one widge
+func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
+	// serve template
+	if err := app.renderTemplate(w, r, "buy-once", nil); err != nil {
+		app.errorLog.Println(err)
 	}
 }
