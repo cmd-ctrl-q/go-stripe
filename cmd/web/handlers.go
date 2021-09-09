@@ -7,12 +7,8 @@ import (
 )
 
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
-	stringMap := make(map[string]string)
-	stringMap["publishable_key"] = app.config.stripe.key
 
-	if err := app.renderTemplate(w, r, "terminal", &templateData{
-		StringMap: stringMap,
-	}, "stripe-js"); err != nil {
+	if err := app.renderTemplate(w, r, "terminal", nil, "stripe-js"); err != nil {
 		app.errorLog.Println(err)
 	}
 }
@@ -51,9 +47,6 @@ func (app *application) PaymentSucceed(w http.ResponseWriter, r *http.Request) {
 // ChargeOnce displays the page to buy one widge
 func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 
-	stringMap := make(map[string]string)
-	stringMap["publishable_key"] = app.config.stripe.key
-
 	widget := models.Widget{
 		ID:             1,
 		Name:           "Custom Widget",
@@ -67,8 +60,7 @@ func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 
 	// serve template
 	if err := app.renderTemplate(w, r, "buy-once", &templateData{
-		StringMap: stringMap,
-		Data:      data,
+		Data: data,
 	}, "stripe-js"); err != nil {
 		app.errorLog.Println(err)
 	}
