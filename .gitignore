@@ -2,7 +2,7 @@
 /dist
 stack.yml
 docker-compose.yml
-mariadb
+database.yml
 HOWTO.md
 
 Makefile

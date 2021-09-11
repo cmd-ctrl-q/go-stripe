@@ -1,0 +1,20 @@
+create_table("orders") {
+    t.Column("id", "integer", {primary: true})
+    t.Column("widget_id", "integer", {"unsigned":true})
+    t.Column("transaction_id", "integer", {"unsigned":true})
+    t.Column("status_id", "integer", {"unsigned":true})
+    t.Column("quantity", "integer", {})
+    t.Column("amount", "integer", {})
+    t.Column("created_at", "timestamp", {})
+    t.Column("updated_at", "timestamp", {})
+}
+
+add_foreign_key("orders", "widget_id", {"widgets": ["id"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
+
+add_foreign_key("orders", "transaction_id", {"transactions": ["id"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})

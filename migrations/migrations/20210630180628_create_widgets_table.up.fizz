@@ -1,0 +1,11 @@
+create_table("widgets") {
+    t.Column("id", "integer", {primary: true})
+    t.Column("name", "string", {"default": ""})
+    t.Column("description", "text")
+    t.Column("inventory_level", "integer", {})
+    t.Column("price", "integer", {})
+    t.Column("created_at", "timestamp", {})
+    t.Column("updated_at", "timestamp", {})
+}
+
+sql("insert into widgets (name, description, inventory_level, price, created_at, updated_at) values ('Widget', 'A very nice widget.', 10, 1000, now(), now());")
