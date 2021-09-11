@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
+	"github.com/go-chi/chi/v5"
 )
 
 // sending
@@ -76,4 +77,30 @@ func (app *application) GetPaymentIntent(w http.ResponseWriter, r *http.Request)
 		w.Write(out)
 	}
 
+}
+
+func (app *application) GetWidgetByID(w http.ResponseWriter, r *http.Request) {
+	// get id from url
+	id := chi.URLParam(r, "id")
+	widgetID, err := strconv.Atoi(id)
+	if err != nil {
+		app.errorLog.Println("cannot convert param id to int")
+		return
+	}
+
+	widget, err := app.DB.GetWidget(widgetID)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// should not indent for production
+	out, err := json.MarshalIndent(widget, "", "\t")
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
