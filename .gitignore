@@ -1,5 +1,8 @@
 /tmp
 /dist
+stack.yml
+docker-compose.yml
+mariadb
 
 Makefile
 
