@@ -59,7 +59,7 @@ func main() {
 	// read flags into config variable
 	flag.IntVar(&cfg.port, "port", 4000, "Server port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production}")
-	flag.StringVar(&cfg.db.dsn, "dsn", "root:password@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
+	flag.StringVar(&cfg.db.dsn, "dsn", os.Getenv("MARIADB_USER")+":"+os.Getenv("MARIADB_PASS")+"@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
 	flag.StringVar(&cfg.api, "api", "http://localhost:4001", "URL to api")
 	flag.Parse()
 

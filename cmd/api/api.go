@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/driver"
+	"github.com/cmd-ctrl-q/go-stripe/internal/models"
 )
 
 const version = "1.0.0"
@@ -30,6 +31,7 @@ type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	version  string
+	DB       models.DBModel
 }
 
 func (app *application) serve() error {
@@ -53,7 +55,7 @@ func main() {
 	// read flags into config variable
 	flag.IntVar(&cfg.port, "port", 4001, "Server port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production|maintenance}")
-	flag.StringVar(&cfg.db.dsn, "dsn", "root:password@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
+	flag.StringVar(&cfg.db.dsn, "dsn", os.Getenv("MARIADB_USER")+":"+os.Getenv("MARIADB_PASS")+"@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
 	flag.Parse()
 
 	key := os.Getenv("STRIPE_KEY")
@@ -81,6 +83,7 @@ func main() {
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		version:  version,
+		DB:       models.DBModel{DB: conn},
 	}
 
 	err = app.serve()

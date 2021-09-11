@@ -3,6 +3,7 @@
 stack.yml
 docker-compose.yml
 mariadb
+HOWTO.md
 
 Makefile
 
