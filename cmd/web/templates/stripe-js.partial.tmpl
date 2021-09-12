@@ -48,7 +48,7 @@
         hidePayButton();
 
         // how much is being charged 
-        let amountToCharge = String(parseFloat(document.getElementById("amount").value) * 100);
+        let amountToCharge = document.getElementById("amount").value;
 
         // data to send to backend 
         let payload = {
