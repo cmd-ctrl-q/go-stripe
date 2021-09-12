@@ -2,8 +2,9 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
-	"github.com/cmd-ctrl-q/go-stripe/internal/models"
+	"github.com/go-chi/chi/v5"
 )
 
 func (app *application) VirtualTerminal(w http.ResponseWriter, r *http.Request) {
@@ -46,13 +47,17 @@ func (app *application) PaymentSucceed(w http.ResponseWriter, r *http.Request) {
 
 // ChargeOnce displays the page to buy one widge
 func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	widgetID, err := strconv.Atoi(id)
+	if err != nil {
+		app.errorLog.Println("cannot convert param id to int. Possible fixes: env variable, chi/v5 import")
+		return
+	}
 
-	widget := models.Widget{
-		ID:             1,
-		Name:           "Custom Widget",
-		Description:    "Some amazing description",
-		InventoryLevel: 10,
-		Price:          1000, // ie $10.00
+	widget, err := app.DB.GetWidget(widgetID)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
 	}
 
 	data := make(map[string]interface{})
