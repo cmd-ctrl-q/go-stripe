@@ -11,7 +11,7 @@ func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
 
 	mux.Get("/virtual-terminal", app.VirtualTerminal)
-	mux.Post("/payment-succeeded", app.PaymentSucceed)
+	mux.Post("/payment-succeeded", app.PaymentSucceeded)
 
 	mux.Get("/widget/{id}", app.ChargeOnce)
 
