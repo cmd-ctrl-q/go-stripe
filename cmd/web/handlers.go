@@ -135,14 +135,22 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	data["first_name"] = firstName
 	data["last_name"] = lastName
 
-	// Write data to session and redirect user to new page
-	// prevent customer from being charged twice if they resubmit form
+	// Write data to session to prevent customer from being charged twice if they resubmit form
+	app.Session.Put(r.Context(), "receipt", data)
 
-	if err := app.renderTemplate(w, r, "succeeded", &templateData{
+	// redirect user to another page
+	http.Redirect(w, r, "/receipt", http.StatusSeeOther)
+}
+
+func (app *application) Receipt(w http.ResponseWriter, r *http.Request) {
+	// get data from session
+	data := app.Session.Get(r.Context(), "receipt").(map[string]interface{})
+	// remove data from session
+	app.Session.Remove(r.Context(), "receipt")
+	if err := app.renderTemplate(w, r, "receipt", &templateData{
 		Data: data,
 	}); err != nil {
 		app.errorLog.Println(err)
-		return
 	}
 }
 
