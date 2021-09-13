@@ -3,8 +3,10 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
+	"github.com/cmd-ctrl-q/go-stripe/internal/models"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -32,12 +34,19 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	}
 
 	// read posted data
+	firstName := r.Form.Get("first_name")
+	lastName := r.Form.Get("last_name")
 	cardHolder := r.Form.Get("cardholder_name")
 	email := r.Form.Get("email")
 	paymentIntent := r.Form.Get("payment_intent")
 	paymentMethod := r.Form.Get("payment_method")
 	paymentAmount := r.Form.Get("payment_amount")
 	paymentCurrency := r.Form.Get("payment_currency")
+	widgetID, err := strconv.Atoi(r.Form.Get("product_id"))
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
 
 	// create card
 	card := cards.Card{
@@ -64,10 +73,54 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	expiryYear := pm.Card.ExpYear
 
 	// create new customer
+	customerID, err := app.SaveCustomer(firstName, lastName, email)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
 
-	// create new order
+	app.infoLog.Println("customerID", customerID)
 
 	// create new transaction
+	amount, err := strconv.Atoi(paymentAmount)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	txn := models.Transaction{
+		Amount:              amount,
+		Currency:            paymentCurrency,
+		LastFour:            lastFour,
+		ExpiryMonth:         int(expiryMonth),
+		ExpiryYear:          int(expiryYear),
+		BankReturnCode:      pi.Charges.Data[0].ID,
+		TransactionStatusID: 2, // 2, Cleared
+	}
+
+	txnID, err := app.SaveTransaction(txn)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// create new order
+	order := models.Order{
+		WidgetID:      widgetID,
+		TransactionID: txnID,
+		CustomerID:    customerID,
+		StatusID:      1, // 1, cleared
+		Quantity:      1,
+		Amount:        amount,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+	}
+
+	_, err = app.SaveOrder(order)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
 
 	// data to return with template
 	data := make(map[string]interface{})
@@ -91,6 +144,42 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		app.errorLog.Println(err)
 		return
 	}
+}
+
+// SaveCustomer saves a custome and returns id
+func (app *application) SaveCustomer(firstName, lastName, email string) (int, error) {
+	customer := models.Customer{
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+	}
+
+	id, err := app.DB.InsertCustomer(customer)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (app *application) SaveTransaction(txn models.Transaction) (int, error) {
+	id, err := app.DB.InsertTransaction(txn)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (app *application) SaveOrder(order models.Order) (int, error) {
+	id, err := app.DB.InsertOrder(order)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
 }
 
 // ChargeOnce displays the page to buy one widge
