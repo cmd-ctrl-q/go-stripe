@@ -36,7 +36,6 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	// read posted data
 	firstName := r.Form.Get("first_name")
 	lastName := r.Form.Get("last_name")
-	cardHolder := r.Form.Get("cardholder_name")
 	email := r.Form.Get("email")
 	paymentIntent := r.Form.Get("payment_intent")
 	paymentMethod := r.Form.Get("payment_method")
@@ -79,8 +78,6 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	app.infoLog.Println("customerID", customerID)
-
 	// create new transaction
 	amount, err := strconv.Atoi(paymentAmount)
 	if err != nil {
@@ -94,6 +91,8 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		LastFour:            lastFour,
 		ExpiryMonth:         int(expiryMonth),
 		ExpiryYear:          int(expiryYear),
+		PaymentIntent:       paymentIntent,
+		PaymentMethod:       paymentMethod,
 		BankReturnCode:      pi.Charges.Data[0].ID,
 		TransactionStatusID: 2, // 2, Cleared
 	}
@@ -124,7 +123,6 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 
 	// data to return with template
 	data := make(map[string]interface{})
-	data["cardholder"] = cardHolder
 	data["email"] = email
 	data["pi"] = paymentIntent
 	data["pm"] = paymentMethod
@@ -134,6 +132,8 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 	data["expiry_month"] = expiryMonth
 	data["expiry_year"] = expiryYear
 	data["bank_return_code"] = pi.Charges.Data[0].ID
+	data["first_name"] = firstName
+	data["last_name"] = lastName
 
 	// Write data to session and redirect user to new page
 	// prevent customer from being charged twice if they resubmit form
