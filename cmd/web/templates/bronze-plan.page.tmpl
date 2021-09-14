@@ -58,7 +58,7 @@ Bronze Plan
     <hr>
 
     <!-- card validation -->
-    <a id="pay-button" href="javascript:void(0)" class="btn btn-primary" onclick="val()">Pay ${{formatCurrency $widget.Price}}/month</a>
+    <a id="pay-button" href="javascript:void(0)" class="btn btn-primary" onclick="val()">Pay {{formatCurrency $widget.Price}}/month</a>
     <div id="processing-payment" class="text-center d-none">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
@@ -70,4 +70,137 @@ Bronze Plan
     <input type="hidden" name="payment_amount" id="payment_amount">
     <input type="hidden" name="payment_currency" id="payment_currency">
 </form>
+{{end}}
+
+{{define "js"}}
+{{$widget := index .Data "widget"}}
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+            let card;
+    let stripe;
+    const cardMessages = document.getElementById("card-messages");
+    const payButton = document.getElementById("pay-button");
+    const processing = document.getElementById("processing-payment");
+
+    stripe = Stripe({{.StripePublishableKey}});
+
+    function hidePayButton() {
+        // prevent creditcard from processing twice
+        payButton.classList.add("d-none");
+        // hide spinner
+        processing.classList.remove("d-none");
+    }
+
+    function showPayButtons() {
+        payButton.classList.remove("d-none");
+        processing.classList.add("d-none");
+    }
+
+    function showCardError(msg) {
+        cardMessages.classList.add("alert-danger");
+        cardMessages.classList.remove("alert-success");
+        cardMessages.classList.remove("d-none");
+        cardMessages.innerText = msg;
+    }
+
+    function showCardSuccess() {
+        cardMessages.classList.remove("alert-danger");
+        cardMessages.classList.add("alert-success");
+        cardMessages.classList.remove("d-none");
+        cardMessages.innerText = "Transaction successful";
+    }
+
+    function val() {
+        let form = document.getElementById("charge_form");
+        if (form.checkValidity() === false) {
+            this.event.preventDefault(); // dont go further 
+            this.event.stopPropagation();
+            form.classList.add("was-validated");
+            return;
+        }
+        form.classList.add("was-validated");
+        hidePayButton();
+
+        // how much is being charged 
+        let amountToCharge = document.getElementById("amount").value;
+
+        stripe.createPaymentMethod({
+            type: 'card',
+            card: card, 
+            billing_details: {
+                email: document.getElementById("cardholder-email").value,
+            },
+        }).then(stripePaymentMethodHandler);
+    }
+
+    function stripePaymentMethodHandler(result) {
+        // error is from stripe's createPaymentMethod
+        if (result.error) {
+             showCardError(result.error.message);
+        } else {
+            // create customer and subscribe to plan 
+            let payload = {
+                plan: '{{$widget.PlanID}}', 
+                payment_method: result.paymentMethod.id, // from stripe
+                email: document.getElementById("cardholder-email").value,
+                last_four: result.paymentMethod.card.last4, // front stripe
+            }
+
+            // create request options 
+            const requestOptions = {
+                method: 'post', 
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                // stringify payload
+                body: JSON.stringify(payload),
+            }
+
+            // send post request
+            fetch("{{.API}}/api/create-customer-and-subscribe-to-plan", requestOptions)
+            .then(response => response.json())
+            .then(function(data) {
+                console.log(data);
+                // hide processing button 
+                processing.classList.add("d-none");
+                // set hidden vars 
+                // submit form
+            })
+        }
+    }
+
+    (function () {
+        // create stripe & elements 
+        const elements = stripe.elements();
+        const style = {
+            base: {
+                fontSize: '16px',
+                lineHeight: '24px',
+            }
+        };
+
+        // create card entry 
+        card = elements.create('card', {
+            style: style,
+            hidePostalCode: true,
+        });
+        card.mount("#card-element");
+
+        // check for input errors 
+        card.addEventListener('change', function (event) {
+            var displayError = document.getElementById("card-errors");
+            if (event.error) {
+                displayError.classList.remove('d-none');
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.classList.add('d-none') // hide error 
+                displayError.textContent = '';
+            }
+        });
+    })();
+
+</script>
 {{end}}
