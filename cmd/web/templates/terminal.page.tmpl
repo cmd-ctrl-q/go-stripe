@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <input type="hidden" name="amount" id="amount">
+    <input type="text" name="amount" id="amount">
     <input type="hidden" name="payment_intent" id="payment_intent">
     <input type="hidden" name="payment_method" id="payment_method">
     <input type="hidden" name="payment_amount" id="payment_amount">
@@ -61,11 +61,11 @@
 
 {{define "js"}}
 <script>
-    document.getElementById("charge_amount", function(e) {
+    document.getElementById("charge_amount").addEventListener("change", function(e) {
         // amount was entered
         if (e.target.value !== "") {
             // take amount entered and multiply by 100
-            document.getElementById("amount").value = e.target.value * 100;
+            document.getElementById("amount").value = parseInt(e.target.value * 100, 10);
         } else {
              document.getElementById("amount").value = 0;
         }
