@@ -312,11 +312,20 @@ func (app *application) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) BronzePlan(w http.ResponseWriter, r *http.Request) {
-	// send data to client
-	intMap := make(map[string]int)
-	intMap["plan_id"] = 1
+	// get data about bronze plan to send to client
+	widget, err := app.DB.GetWidget(2)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	// create data types
+	data := make(map[string]interface{})
+	data["widget"] = widget
+
+	// render template and send data to client
 	if err := app.renderTemplate(w, r, "bronze-plan", &templateData{
-		IntMap: intMap,
+		Data: data,
 	}); err != nil {
 		app.errorLog.Println(err)
 	}
