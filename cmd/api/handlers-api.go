@@ -7,6 +7,7 @@ import (
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
 	"github.com/go-chi/chi/v5"
+	"github.com/stripe/stripe-go/v72"
 )
 
 // sending
@@ -15,10 +16,23 @@ type stripePayload struct {
 	Amount        string `json:"amount"`
 	PaymentMethod string `json:"payment_method"`
 	Email         string `json:"email"`
-	LastFour      string `json:"last_four"`
 
-	// The id of the stripe plan
+	// CardBrand is the card association that facilitates
+	// card transactions. E.g. Visa, Mastercard, Discover
+	CardBrand   string `json:"card_brand"`
+	ExpiryMonth string `json:"exp_month"`
+	ExpiryYear  string `json:"exp_year"`
+
+	// LastFour is the last four digits of the card number
+	LastFour string `json:"last_four"`
+
+	// The ID of the stripe plan
 	Plan string `json:"plan"`
+
+	// ProductID is the ID of the item being sold
+	ProductID string `json:"product_id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 // receiving
@@ -130,21 +144,33 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		Currency: data.Currency,
 	}
 
+	okay := true
+	var subscription *stripe.Subscription
+
 	// get stripe customer
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
 		app.errorLog.Println(err)
-		return
+		okay = false
 	}
 
-	// get subscription id
-	subscriptionID, err := card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
-	if err != nil {
-		app.errorLog.Println(err)
-		return
+	if okay {
+		// get subscription
+		subscription, err = card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
+		if err != nil {
+			app.errorLog.Println(err)
+			okay = false
+		}
+		app.infoLog.Println("subscriptionID", subscription.ID)
 	}
 
-	app.infoLog.Println("subscriptionID", subscriptionID)
+	if okay {
+		// create customer
+
+		// create transaction
+
+		// create order
+	}
 
 	// return response
 	resp := jsonResponse{
