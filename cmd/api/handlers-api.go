@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
+	"github.com/cmd-ctrl-q/go-stripe/internal/models"
 	"github.com/go-chi/chi/v5"
 	"github.com/stripe/stripe-go/v72"
 )
@@ -20,8 +22,8 @@ type stripePayload struct {
 	// CardBrand is the card association that facilitates
 	// card transactions. E.g. Visa, Mastercard, Discover
 	CardBrand   string `json:"card_brand"`
-	ExpiryMonth string `json:"exp_month"`
-	ExpiryYear  string `json:"exp_year"`
+	ExpiryMonth int    `json:"exp_month"`
+	ExpiryYear  int    `json:"exp_year"`
 
 	// LastFour is the last four digits of the card number
 	LastFour string `json:"last_four"`
@@ -136,8 +138,6 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		return
 	}
 
-	app.infoLog.Println(data.Email, data.LastFour, data.PaymentMethod, data.Plan)
-
 	card := cards.Card{
 		Secret:   app.config.stripe.secret,
 		Key:      app.config.stripe.key,
@@ -146,12 +146,14 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 
 	okay := true
 	var subscription *stripe.Subscription
+	txnMsg := "Transaction successful"
 
 	// get stripe customer
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
 		app.errorLog.Println(err)
 		okay = false
+		txnMsg = msg
 	}
 
 	if okay {
@@ -160,22 +162,70 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 		if err != nil {
 			app.errorLog.Println(err)
 			okay = false
+			txnMsg = "Error subscribing customer"
 		}
-		app.infoLog.Println("subscriptionID", subscription.ID)
 	}
 
 	if okay {
-		// create customer
+		productID, err := strconv.Atoi(data.ProductID)
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
 
-		// create transaction
+		// save customer
+		// for now assume every trasaction is a new customer
+		customerID, err := app.SaveCustomer(data.FirstName, data.LastName, data.Email)
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
 
-		// create order
+		// create new transaction
+		amount, err := strconv.Atoi(data.Amount)
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
+
+		txn := models.Transaction{
+			Amount:              amount,
+			Currency:            "usd",
+			LastFour:            data.LastFour,
+			ExpiryMonth:         data.ExpiryMonth,
+			ExpiryYear:          data.ExpiryYear,
+			TransactionStatusID: 2,
+		}
+
+		txnID, err := app.SaveTransaction(txn)
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
+
+		// create new order
+		order := models.Order{
+			WidgetID:      productID,
+			TransactionID: txnID,
+			CustomerID:    customerID,
+			StatusID:      1,
+			Quantity:      1,
+			Amount:        amount,
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+		}
+
+		_, err = app.SaveOrder(order)
+		if err != nil {
+			app.errorLog.Println(err)
+			return
+		}
 	}
 
 	// return response
 	resp := jsonResponse{
-		OK:      true,
-		Message: msg,
+		OK:      okay,
+		Message: txnMsg,
 	}
 
 	out, err := json.MarshalIndent(resp, "", "\t")
@@ -186,4 +236,40 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
+}
+
+// SaveCustomer saves a custome and returns id
+func (app *application) SaveCustomer(firstName, lastName, email string) (int, error) {
+	customer := models.Customer{
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+	}
+
+	id, err := app.DB.InsertCustomer(customer)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (app *application) SaveTransaction(txn models.Transaction) (int, error) {
+	id, err := app.DB.InsertTransaction(txn)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (app *application) SaveOrder(order models.Order) (int, error) {
+	id, err := app.DB.InsertOrder(order)
+	if err != nil {
+		app.errorLog.Println(err)
+		return 0, err
+	}
+
+	return id, nil
 }
