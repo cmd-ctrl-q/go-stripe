@@ -96,7 +96,7 @@ func (c *Card) SubscribeToPlan(cust *stripe.Customer, plan, email, last4, cardTy
 	params.AddMetadata("last_four", last4)
 	params.AddMetadata("card_type", cardType)
 	// get payment intent from a subscription
-	params.AddExpand("lastest_invoice.payment_intent")
+	params.AddExpand("latest_invoice.payment_intent")
 	subscription, err := sub.New(params)
 	if err != nil {
 		return "", err
