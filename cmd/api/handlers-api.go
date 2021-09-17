@@ -164,6 +164,8 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			okay = false
 			txnMsg = "Error subscribing customer"
 		}
+
+		app.infoLog.Println("subscription id:", subscription.ID)
 	}
 
 	if okay {

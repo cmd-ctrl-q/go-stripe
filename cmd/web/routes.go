@@ -21,6 +21,7 @@ func (app *application) routes() http.Handler {
 	mux.Get("/receipt", app.Receipt)
 
 	mux.Get("/plans/bronze", app.BronzePlan)
+	mux.Get("/receipt/bronze", app.BronzePlanReceipt)
 
 	// serve the static file
 	fileServer := http.FileServer(http.Dir("./static"))
