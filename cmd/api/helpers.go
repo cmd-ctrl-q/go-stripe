@@ -73,3 +73,20 @@ func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err e
 	w.Write(out)
 	return nil
 }
+
+func (app *application) invalidCredentials(w http.ResponseWriter) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = "invalid authentication credentials"
+
+	err := app.writeJSON(w, http.StatusUnauthorized, payload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
