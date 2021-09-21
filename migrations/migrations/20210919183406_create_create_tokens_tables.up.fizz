@@ -9,4 +9,3 @@ create_table("tokens") {
 }
 
 sql("alter table tokens modify token_hash varbinary(255);")
-sql("insert into widgets (name, description, inventory_level, price, created_at, updated_at) values ('Widget', 'A very nice widget.', 10, 1000, now(), now());")
