@@ -31,9 +31,7 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="/">Home</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/virtual-terminal">Virtual Terminal</a>
-          </li>
+
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
               aria-expanded="false">
@@ -44,10 +42,15 @@
               <li><a class="dropdown-item" href="/plans/bronze">Subscription</a></li>
             </ul>
           </li>
+
+          <li id="vt-link" class="nav-item d-none">
+            <a class="nav-link" href="/virtual-terminal">Virtual Terminal</a>
+          </li>
+
         </ul>
 
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
+          <li id="login-link" class="nav-item d-none">
             <a href="/login" class="nav-link">Login</a>
           </li>
         </ul>
@@ -67,6 +70,34 @@
     integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
     crossorigin="anonymous"></script>
 
+  <script>
+    // get reference to login link and virtual terminal 
+    let loginLink = document.getElementById("login-link");
+    let vtLink = document.getElementById("vt-link");
+
+    // listen when the dom content is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      if (localStorage.getItem("token") !== null) {
+        // user is likely logged in 
+        // show logout 
+        loginLink.innerHTML = '<a href="/#!" class="nav-link" onclick="logout()">Logout</a>';
+        vtLink.classList.remove("d-none");
+      } else {
+        loginLink.innerHTML = '<a href="/login" class="nav-link">Login</a>';
+      }
+
+      // remove the class that's hiding the element
+      loginLink.classList.remove("d-none");
+    })
+
+    function logout() {
+      // remove items from local storage 
+      localStorage.removeItem("token");
+      localStorage.removeItem("token_expiry");
+      // redirect to login endpoint
+      location.href = "/login";
+    }
+  </script>
   {{block "js" .}}
 
   {{end}}

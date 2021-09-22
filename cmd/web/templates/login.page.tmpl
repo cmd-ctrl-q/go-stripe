@@ -91,6 +91,9 @@ function val() {
                 localStorage.setItem('token', data.token.token);
                 localStorage.setItem('token_expiry', data.token.expiry);
                 showSuccess();
+                
+                // redirect to home page
+                location.href = "/";
             } else {
                 // error
                 showError(data.message);
