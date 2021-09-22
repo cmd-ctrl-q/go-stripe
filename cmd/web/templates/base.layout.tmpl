@@ -97,6 +97,37 @@
       // redirect to login endpoint
       location.href = "/login";
     }
+
+    // checks if user is authenticated by doing a backend fetch request
+    function checkAuth() {
+      // if token doesnt exist in local storage
+      if (localStorage.getItem("token") === null) {
+        // redirect user to home page 
+        location.href = "/login";
+      } else {
+        // get token from storage 
+        let token = localStorage.getItem("token"); 
+        const myHeaders = new Headers(); 
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("Authorization", "Bearer " + token);
+
+        const requestOptions = {
+          method: "POST", 
+          headers: myHeaders, 
+        }
+
+        fetch("{{.API}}/api/is-authenticated", requestOptions)
+        .then((response => response.json()))
+        .then(function(data) {
+          if (data.error === true) {
+            console.log("Not logged in"); 
+            location.href = "/login";
+          } else {
+            console.log("Logged in!");
+          }
+        })
+      }
+    }
   </script>
   {{block "js" .}}
 

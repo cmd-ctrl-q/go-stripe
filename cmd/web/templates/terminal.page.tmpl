@@ -60,7 +60,11 @@
 {{end}}
 
 {{define "js"}}
+
 <script>
+    // check auth before rendering page
+    checkAuth();
+
     document.getElementById("charge_amount").addEventListener("change", function(e) {
         // amount was entered
         if (e.target.value !== "") {
