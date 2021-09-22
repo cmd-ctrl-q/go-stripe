@@ -5,35 +5,58 @@ Login
 {{end}}
 
 {{define "content"}}
-<form action="" method="post"
-    name="login_form" id="login_form"
-    class="d-block needs-validation"
-    autocomplete="off" novalidate="">
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="alert alert-danger text-center d-none" id="login-messages"></div>
 
-    <h2 class="mt-2 mb-3 text-center">Login</h2>
-    <hr>
+        <form action="" method="post"
+            name="login_form" id="login_form"
+            class="d-block needs-validation"
+            autocomplete="off" novalidate="">
 
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" 
-            required="" autocomplete="email-new">
+            <h2 class="mt-2 mb-3 text-center">Login</h2>
+            <hr>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                    required="" autocomplete="email-new">
+            </div>
+        
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" 
+                    required="" autocomplete="password-new">
+            </div>
+        
+            <hr>
+        
+            <a href="javascript:void(0)" class="btn btn-primary" onclick="val()">Login</a>
+        
+        </form>
     </div>
-
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" name="password" 
-            required="" autocomplete="password-new">
-    </div>
-
-    <hr>
-
-    <a href="javascript:void(0)" class="btn btn-primary" onclick="val()">Login</a>
-
-</form>
+</div>
 {{end}}
 
 {{define "js"}}
 <script>
+
+let loginMessages = document.getElementById("login-messages");
+
+function showError(msg) {
+    loginMessages.classList.add("alert-danger");
+    loginMessages.classList.remove("alert-success");
+    loginMessages.classList.remove("d-none");
+    loginMessages.innerText = msg;
+}
+
+function showSuccess() {
+    loginMessages.classList.remove("alert-danger");
+    loginMessages.classList.add("alert-success");
+    loginMessages.classList.remove("d-none");
+    loginMessages.innerText = "Login successful";
+}
+
 function val() {
     let form = document.getElementById("login_form");
     if (form.checkValidity() === false) {
@@ -61,8 +84,17 @@ function val() {
 
     fetch("{{.API}}/api/authenticate", requestOptions)
         .then(response => response.json())
-        .then(response => {
-            console.log(response);
+        .then(data => {
+            console.log(data);
+            if (data.error === false) {
+                // success, store token in storage 
+                localStorage.setItem('token', data.token.token);
+                localStorage.setItem('token_expiry', data.token.expiry);
+                showSuccess();
+            } else {
+                // error
+                showError(data.message);
+            }
         })
 }
 </script>
