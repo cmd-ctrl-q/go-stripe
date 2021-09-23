@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
@@ -340,6 +342,16 @@ func (app *application) authenticateToken(r *http.Request) (*models.User, error)
 	var u models.User
 
 	// get bearer token from header
+	authorizationHeader := r.Header.Get("Authorization")
+	if authorizationHeader == "" {
+		return nil, errors.New("no authorization header received")
+	}
+
+	// get bearer token
+	headerParts := strings.Split(authorizationHeader, " ")
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		return nil, errors.New("no authorization header received")
+	}
 
 	return &u, nil
 }
