@@ -27,5 +27,14 @@ func (app *application) routes() http.Handler {
 	mux.Post("/api/authenticate", app.CreateAuthToken)
 	mux.Post("/api/is-authenticated", app.CheckAuthentication)
 
+	// apply middleware to mux to protect routes
+	mux.Route("/api/admin", func(r chi.Router) {
+		r.Use(app.Auth)
+
+		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("got in!!!"))
+		})
+	})
+
 	return mux
 }
