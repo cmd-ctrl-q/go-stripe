@@ -34,6 +34,8 @@ func (app *application) routes() http.Handler {
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("got in!!!"))
 		})
+
+		r.Post("/virtual-terminal-succeeded", app.VirtualTerminalPaymentSucceeded)
 	})
 
 	return mux
