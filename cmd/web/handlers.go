@@ -345,3 +345,31 @@ func (app *application) LoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (app *application) PostLoginPage(w http.ResponseWriter, r *http.Request) {
+	// renew session token
+	app.Session.RenewToken(r.Context())
+
+	// parse form
+	err := r.ParseForm()
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	// query database and compare session password with db password
+	id, err := app.DB.Authenticate(email, password)
+	if err != nil {
+		// TODO: store error message in session to render on frontend
+
+		// redirect
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+
+	// add user id to session
+	app.Session.Put(r.Context(), "userID", id)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
