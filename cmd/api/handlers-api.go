@@ -398,7 +398,7 @@ func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r
 		LastFour        string `json:"last_four"`
 	}
 
-	err := app.readJSON(w, r, txnData)
+	err := app.readJSON(w, r, &txnData)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
