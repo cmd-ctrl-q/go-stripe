@@ -3,6 +3,7 @@ module github.com/cmd-ctrl-q/go-stripe
 go 1.16
 
 require (
+	github.com/alexedwards/scs/mysqlstore v0.0.0-20210904201103-9ffa4cfa9323 // indirect
 	github.com/alexedwards/scs/v2 v2.4.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.4
