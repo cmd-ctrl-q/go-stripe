@@ -94,8 +94,9 @@
       // remove items from local storage 
       localStorage.removeItem("token");
       localStorage.removeItem("token_expiry");
-      // redirect to login endpoint
-      location.href = "/login";
+      // location.href = "/login";
+      // redirect to logout endpoint which redirects user to login page
+      location.href = "/logout";
     }
 
     // checks if user is authenticated by doing a backend fetch request
