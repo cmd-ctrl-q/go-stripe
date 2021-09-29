@@ -34,7 +34,8 @@ func (s *Signer) GenerateTokenFromString(data string) string {
 	return token
 }
 
-// VerifyToken verifies whether the link has been changed
+// VerifyToken verifies whether the link has been changed.
+// Returns true if token has expired else returns false.
 func (s *Signer) VerifyToken(token string) bool {
 	crypt := goalone.New(s.Secret, goalone.Timestamp)
 

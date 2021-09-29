@@ -11,6 +11,7 @@ import (
 
 	"github.com/cmd-ctrl-q/go-stripe/internal/cards"
 	"github.com/cmd-ctrl-q/go-stripe/internal/models"
+	"github.com/cmd-ctrl-q/go-stripe/internal/urlsigner"
 	"github.com/go-chi/chi/v5"
 	"github.com/stripe/stripe-go/v72"
 )
@@ -457,12 +458,36 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	// very the email exists
+	_, err = app.DB.GetUserByEmail(payload.Email)
+	if err != nil {
+		var resp struct {
+			Error   bool   `json:"error"`
+			Message string `json:"message"`
+		}
+		resp.Error = true
+		resp.Message = "No matching email found"
+		app.writeJSON(w, http.StatusAccepted, &resp)
+		return
+	}
+
+	// create new default link
+	link := fmt.Sprintf("%s/reset-password?email=%s", app.config.frontend, payload.Email)
+
+	// create valid signed url
+	sign := urlsigner.Signer{
+		Secret: []byte(app.config.secretkey),
+	}
+
+	// sign the new link
+	signedLink := sign.GenerateTokenFromString(link)
+
 	// send user email with link to password request
 	var data struct {
 		Link string
 	}
 
-	data.Link = "http://www.selu.edu"
+	data.Link = signedLink
 
 	// send mail
 	app.SendMail("info@widgets.com", "info@widgets.com", "Password Reset Request", "password-reset", data)
