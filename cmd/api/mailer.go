@@ -5,6 +5,9 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"time"
+
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 //go:embed templates
@@ -23,6 +26,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 
 	// store template into buffer
 	var tpl bytes.Buffer
+	// "body" is defined in template as {{define "body"}}
 	if err = t.ExecuteTemplate(&tpl, "body", data); err != nil {
 		app.errorLog.Println(err)
 		return err
@@ -46,6 +50,45 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 
 	// plain text email version
 	plainMessage := tpl.String()
+
+	app.infoLog.Println(formattedMessage, plainMessage)
+
+	// send mail
+	server := mail.NewSMTPClient()
+	server.Host = app.config.smtp.host
+	server.Port = app.config.smtp.port
+	server.Username = app.config.smtp.username
+	server.Password = app.config.smtp.password
+	server.Encryption = mail.EncryptionTLS
+	server.KeepAlive = false
+	server.ConnectTimeout = 10 * time.Second
+	server.SendTimeout = 10 * time.Second
+
+	// connect to server
+	smtpClient, err := server.Connect()
+	if err != nil {
+		return err
+	}
+
+	// send email
+	email := mail.NewMSG()
+	email.SetFrom(from).
+		AddTo(to).
+		SetSubject(subject)
+
+	// set html body
+	email.SetBody(mail.TextHTML, formattedMessage)
+
+	// set plain text body
+	email.AddAlternative(mail.TextPlain, plainMessage)
+
+	err = email.Send(smtpClient)
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	app.infoLog.Println("send mail")
 
 	return nil
 }
