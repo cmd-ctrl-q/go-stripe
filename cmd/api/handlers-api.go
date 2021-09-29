@@ -451,7 +451,7 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 		Email string `json:"email"`
 	}
 
-	err := app.readJSON(w, r, payload)
+	err := app.readJSON(w, r, &payload)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
