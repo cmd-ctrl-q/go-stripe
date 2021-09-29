@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/alexedwards/scs/mysqlstore v0.0.0-20210904201103-9ffa4cfa9323 // indirect
 	github.com/alexedwards/scs/v2 v2.4.0
+	github.com/bwmarrin/go-alone v0.0.0-20190806015146-742bb55d1631 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.4
 	github.com/go-chi/cors v1.2.0
