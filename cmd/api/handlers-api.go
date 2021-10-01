@@ -16,7 +16,6 @@ import (
 	"github.com/stripe/stripe-go/v72"
 )
 
-// sending
 type stripePayload struct {
 	Currency      string `json:"currency"`
 	Amount        string `json:"amount"`
