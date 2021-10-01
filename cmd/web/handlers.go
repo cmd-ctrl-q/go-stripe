@@ -401,9 +401,17 @@ func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request
 
 	// check if secret key is valid
 	valid := signer.VerifyToken(testURL)
-	if valid {
-		w.Write([]byte("valid"))
-	} else {
-		w.Write([]byte("invalid"))
+	if !valid {
+		app.errorLog.Println("Invalid url - tampering detected")
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["email"] = r.URL.Query().Get("email")
+
+	if err := app.renderTemplate(w, r, "reset-password", &templateData{
+		Data: data,
+	}); err != nil {
+		app.errorLog.Println(err)
 	}
 }
