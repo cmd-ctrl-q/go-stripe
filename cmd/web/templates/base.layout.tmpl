@@ -47,13 +47,38 @@
             <a class="nav-link" href="/admin/virtual-terminal">Virtual Terminal</a>
           </li>
 
+          {{if eq .IsAuthenticated 1}}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Admin
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" href="/admin/virtual-terminal">Virtual Terminal</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/admin/all-sales">All Sales</a></li>
+              <li><a class="dropdown-item" href="/admin/all-subscriptions">All Subscriptions</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+          </li>
+          {{end}}
+
         </ul>
 
+        {{if eq .IsAuthenticated 1}}
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li id="login-link" class="nav-item d-none">
+            <a href="/logout" class="nav-link">Logout</a>
+          </li>
+        </ul>
+        {{else}}
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li id="login-link" class="nav-item">
             <a href="/login" class="nav-link">Login</a>
           </li>
         </ul>
+        {{end}}
       </div>
     </div>
   </nav>
@@ -71,24 +96,6 @@
     crossorigin="anonymous"></script>
 
   <script>
-    // get reference to login link and virtual terminal 
-    let loginLink = document.getElementById("login-link");
-    let vtLink = document.getElementById("vt-link");
-
-    // listen when the dom content is loaded
-    document.addEventListener("DOMContentLoaded", function() {
-      if (localStorage.getItem("token") !== null) {
-        // user is likely logged in 
-        // show logout 
-        loginLink.innerHTML = '<a href="/#!" class="nav-link" onclick="logout()">Logout</a>';
-        vtLink.classList.remove("d-none");
-      } else {
-        loginLink.innerHTML = '<a href="/login" class="nav-link">Login</a>';
-      }
-
-      // remove the class that's hiding the element
-      loginLink.classList.remove("d-none");
-    })
 
     function logout() {
       // remove items from local storage 
