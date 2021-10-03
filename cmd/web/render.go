@@ -9,14 +9,16 @@ import (
 )
 
 type templateData struct {
-	StringMap            map[string]string
-	IntMap               map[string]int
-	FloatMap             map[string]float32
-	Data                 map[string]interface{}
-	CSRFToken            string
-	Flash                string
-	Warning              string
-	Error                string
+	StringMap map[string]string
+	IntMap    map[string]int
+	FloatMap  map[string]float32
+	Data      map[string]interface{}
+	CSRFToken string
+	Flash     string
+	Warning   string
+	Error     string
+
+	// When IsAuthenticated is set to 0, the user is not authenticated.
 	IsAuthenticated      int
 	API                  string // route to api
 	CssVersion           string
@@ -41,6 +43,14 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.API = app.config.api
 	td.StripePublishableKey = app.config.stripe.key
 	td.StripeSecretKey = app.config.stripe.secret
+
+	// check if value IsAuthenticated exists in session
+	if app.Session.Exists(r.Context(), "userID") {
+		td.IsAuthenticated = 1
+	} else {
+		td.IsAuthenticated = 0
+	}
+
 	return td
 }
 
