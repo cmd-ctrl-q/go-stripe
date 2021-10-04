@@ -16,12 +16,10 @@ func (app *application) routes() http.Handler {
 	// protect route
 	mux.Route("/admin", func(r chi.Router) {
 		r.Use(app.Auth)
-
 		r.Get("/virtual-terminal", app.VirtualTerminal)
+		r.Get("/all-sales", app.AllSales)
+		r.Get("/all-subscriptions", app.AllSubscriptions)
 	})
-
-	// mux.Post("/virtual-terminal-payment-succeeded", app.VirtualTerminalPaymentSucceeded)
-	// mux.Get("/virtual-terminal-receipt", app.VirtualTerminalReceipt)
 
 	mux.Get("/widget/{id}", app.ChargeOnce)
 	mux.Post("/payment-succeeded", app.PaymentSucceeded)

@@ -63,8 +63,7 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 	// check if template exists in template cache
 	_, templateInMap := app.templateCache[templateToRender]
 
-	if app.config.env == "production" && templateInMap {
-		// production
+	if templateInMap {
 		t = app.templateCache[templateToRender]
 	} else {
 		// development or template doesn't exist
