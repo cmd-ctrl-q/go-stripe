@@ -43,6 +43,29 @@ All Sales
     // call back
     .then(function (data) {
         console.log(data);
+
+        data.forEach(function(i) {
+            let newRow = tbody.insertRow();
+            let newCell = newRow.insertCell();
+
+            // populate first cell 
+            newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`
+
+            // populate second cell
+            newCell = newRow.insertCell();
+            let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
+            newCell.appendChild(item);
+
+            // populate third cell 
+            newCell = newRow.insertCell();
+            item = document.createTextNode(i.widget.name);
+            newCell.appendChild(item);
+
+            // populate fourth cell 
+            newCell = newRow.insertCell();
+            item = document.createTextNode(i.transaction.amount);
+            newCell.appendChild(item);
+        })
     })
 </script>
 {{end}}
