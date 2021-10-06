@@ -374,8 +374,6 @@ func (m *DBModel) GetAllOrders() ([]*Order, error) {
 			&o.Transaction.BankReturnCode,
 			&o.Customer.ID,
 			&o.Customer.FirstName,
-			&o.Customer.ID,
-			&o.Customer.FirstName,
 			&o.Customer.LastName,
 			&o.Customer.Email,
 		)
