@@ -44,28 +44,47 @@ All Sales
     .then(function (data) {
         console.log(data);
 
-        data.forEach(function(i) {
+        // check if no sales 
+        if (data) {
+
+            
+            data.forEach(function(i) {
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+
+                // populate first cell 
+                newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`
+                
+                // populate second cell
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
+                newCell.appendChild(item);
+                
+                // populate third cell 
+                newCell = newRow.insertCell();
+                item = document.createTextNode(i.widget.name);
+                newCell.appendChild(item);
+                
+                // populate fourth cell 
+                let curr = formatCurrency(i.transaction.amount, i.transaction.currency);
+                newCell = newRow.insertCell();
+                item = document.createTextNode(curr);
+                newCell.appendChild(item);
+            })
+        } else {
             let newRow = tbody.insertRow();
             let newCell = newRow.insertCell();
-
-            // populate first cell 
-            newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`
-
-            // populate second cell
-            newCell = newRow.insertCell();
-            let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
-            newCell.appendChild(item);
-
-            // populate third cell 
-            newCell = newRow.insertCell();
-            item = document.createTextNode(i.widget.name);
-            newCell.appendChild(item);
-
-            // populate fourth cell 
-            newCell = newRow.insertCell();
-            item = document.createTextNode(i.transaction.amount);
-            newCell.appendChild(item);
-        })
+            newCell.setAttribute("colspan", "4");
+            newCell.innerHTML = "No data available";
+        }
     })
+
+    function formatCurrency(amount, ticker) {
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("en-US", {
+            style: "currency", 
+            currency: ticker.toUpperCase(),
+        });
+    }
 </script>
 {{end}}
