@@ -1,0 +1,65 @@
+{{template "base" .}}
+
+{{define "title"}}
+Sale
+{{end}}
+
+{{define "content"}}
+<h2 class="mt-5">Sale</h2>
+<hr>
+<div>
+    <strong>Order No:</strong> <span id="order-no"></span><br>
+    <strong>Customer:</strong> <span id="customer"></span><br>
+    <strong>Product:</strong> <span id="product"></span><br>
+    <strong>Quantity:</strong> <span id="quantity"></span><br>
+    <strong>Total Sale:</strong> <span id="amount"></span><br>
+</div>
+
+<hr>
+
+<a href="/admin/all-sales" class="btn btn-info">Cancel</a>
+<a href="#!" class="btn btn-warning">Refund Order</a>
+
+{{end}}
+
+
+{{define "js"}}
+<script>
+    let token = localStorage.getItem("token"); 
+    let id = window.location.pathname.split("/").pop();
+
+    const requestOptions = {
+        method: 'post', 
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        }, 
+    }
+
+    // backend request
+    fetch("{{.API}}/api/admin/get-sale/" + id, requestOptions)
+    // response becomes response.json() 
+    .then(response => response.json())
+    // call back
+    .then(function (data) {
+        console.log(data);
+
+        if (data) {
+            document.getElementById("order-no").innerHTML = data.id;
+            document.getElementById("customer").innerHTML = data.customer.first_name + " " + data.customer.last_name;
+            document.getElementById("product").innerHTML = data.widget.name;
+            document.getElementById("quantity").innerHTML = data.quantity;
+            document.getElementById("amount").innerHTML = formatCurrency(data.transaction.amount, data.transaction.currency);
+        }
+    })
+
+    function formatCurrency(amount, ticker) {
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("en-US", {
+            style: "currency", 
+            currency: ticker.toUpperCase(),
+        });
+    }
+</script>
+{{end}}
