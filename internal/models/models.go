@@ -320,7 +320,10 @@ func (m *DBModel) UpdatePasswordForUser(u User, hash string) error {
 	return nil
 }
 
-func (m *DBModel) GetAllOrders() ([]*Order, error) {
+// GetAllOrders returns all orders from the database.
+// If isRecurring is set to 0, returns all non-subscribed orders
+// else if set to 1, returns the subscribed orders.
+func (m *DBModel) GetAllOrders(isRecurring int) ([]*Order, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -339,80 +342,12 @@ func (m *DBModel) GetAllOrders() ([]*Order, error) {
 		left join transactions t on (o.transaction_id = t.id)
 		left join customers c on (o.customer_id = c.id)
 	where
-		w.is_recurring = 0
+		w.is_recurring = ?
 	order by 
 		o.created_at desc
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var o Order
-		err = rows.Scan(
-			&o.ID,
-			&o.WidgetID,
-			&o.TransactionID,
-			&o.CustomerID,
-			&o.StatusID,
-			&o.Quantity,
-			&o.Amount,
-			&o.CreatedAt,
-			&o.UpdatedAt,
-			&o.Widget.ID,
-			&o.Widget.Name,
-			&o.Transaction.ID,
-			&o.Transaction.Amount,
-			&o.Transaction.Currency,
-			&o.Transaction.LastFour,
-			&o.Transaction.ExpiryMonth,
-			&o.Transaction.ExpiryYear,
-			&o.Transaction.PaymentIntent,
-			&o.Transaction.BankReturnCode,
-			&o.Customer.ID,
-			&o.Customer.FirstName,
-			&o.Customer.LastName,
-			&o.Customer.Email,
-		)
-
-		if err != nil {
-			return nil, err
-		}
-
-		orders = append(orders, &o)
-	}
-
-	return orders, nil
-}
-
-func (m *DBModel) GetAllSubscriptions() ([]*Order, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var orders []*Order
-
-	query := `
-	select
-		o.id, o.widget_id, o.transaction_id, o.customer_id,
-		o.status_id, o.quantity, o.amount, o.created_at, o.updated_at,
-		w.id, w.name, t.id, t.amount, t.currency, t.last_four, 
-		t.expiry_month, t.expiry_year, t.payment_intent, 
-		t.bank_return_code, c.id, c.first_name, c.last_name, c.email
-	from
-		orders o
-		left join widgets w on (o.widget_id = w.id)
-		left join transactions t on (o.transaction_id = t.id)
-		left join customers c on (o.customer_id = c.id)
-	where
-		w.is_recurring = 1
-	order by 
-		o.created_at desc
-	`
-
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, isRecurring)
 	if err != nil {
 		return nil, err
 	}
