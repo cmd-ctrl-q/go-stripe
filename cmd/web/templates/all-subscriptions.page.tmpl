@@ -7,8 +7,84 @@ All Subscriptions
 {{define "content"}}
 <h2 class="md-5">All Subscriptions</h2>
 <hr>
+
+<table id="sales-table" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Transaction</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Amount</th>
+        </tr>
+        <tbody>
+
+        </tbody>
+    </thead>
+</table>
 {{end}}
 
 {{define "js"}}
+<script>
+    let token = localStorage.getItem("token"); 
+    let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
 
+    const requestOptions = {
+        method: 'post', 
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        }, 
+    }
+
+    fetch("{{.API}}/api/admin/all-subscriptions", requestOptions)
+    // response becomes response.json() 
+    .then(response => response.json())
+    // call back
+    .then(function (data) {
+        console.log(data);
+
+        // check if no sales 
+        if (data) {
+
+            
+            data.forEach(function(i) {
+                let newRow = tbody.insertRow();
+                let newCell = newRow.insertCell();
+
+                // populate first cell 
+                newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`
+                
+                // populate second cell
+                newCell = newRow.insertCell();
+                let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
+                newCell.appendChild(item);
+                
+                // populate third cell 
+                newCell = newRow.insertCell();
+                item = document.createTextNode(i.widget.name);
+                newCell.appendChild(item);
+                
+                // populate fourth cell 
+                let curr = formatCurrency(i.transaction.amount, i.transaction.currency);
+                newCell = newRow.insertCell();
+                item = document.createTextNode(curr);
+                newCell.appendChild(item);
+            })
+        } else {
+            let newRow = tbody.insertRow();
+            let newCell = newRow.insertCell();
+            newCell.setAttribute("colspan", "4");
+            newCell.innerHTML = "No data available";
+        }
+    })
+
+    function formatCurrency(amount, ticker) {
+        let c = parseFloat(amount/100);
+        return c.toLocaleString("en-US", {
+            style: "currency", 
+            currency: ticker.toUpperCase(),
+        });
+    }
+</script>
 {{end}}
