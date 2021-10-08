@@ -53,7 +53,7 @@ All Subscriptions
                 let newCell = newRow.insertCell();
 
                 // populate first cell 
-                newCell.innerHTML = `<a href="/admin/sales/${i.id}">Order ${i.id}</a>`
+                newCell.innerHTML = `<a href="/admin/subscriptions/${i.id}">Order ${i.id}</a>`
                 
                 // populate second cell
                 newCell = newRow.insertCell();
@@ -68,7 +68,7 @@ All Subscriptions
                 // populate fourth cell 
                 let curr = formatCurrency(i.transaction.amount, i.transaction.currency);
                 newCell = newRow.insertCell();
-                item = document.createTextNode(curr);
+                item = document.createTextNode(curr + "/month");
                 newCell.appendChild(item);
             })
         } else {
