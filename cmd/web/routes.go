@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 		r.Get("/all-sales", app.AllSales)
 		r.Get("/all-subscriptions", app.AllSubscriptions)
 		r.Get("/sales/{id}", app.ShowSale)
+		r.Get("/subscriptions/{id}", app.ShowSubscription)
 	})
 
 	mux.Get("/widget/{id}", app.ChargeOnce)
