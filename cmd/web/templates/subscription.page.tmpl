@@ -1,11 +1,11 @@
 {{template "base" .}}
 
 {{define "title"}}
-Sale
+Subscription
 {{end}}
 
 {{define "content"}}
-<h2 class="mt-5">Sale</h2>
+<h2 class="mt-5">Subscription</h2>
 <hr>
 <div>
     <strong>Order No:</strong> <span id="order-no"></span><br>
@@ -17,7 +17,7 @@ Sale
 
 <hr>
 
-<a href="/admin/all-sales" class="btn btn-info">Cancel</a>
+<a href="/admin/all-subscriptions" class="btn btn-info">Cancel</a>
 <a href="#!" class="btn btn-warning">Refund Order</a>
 
 {{end}}
@@ -37,11 +37,12 @@ Sale
     }
 
     // backend request
-    fetch("{{.API}}/api/admin/get-sale/" + id, requestOptions)
+    fetch("{{.API}}/api/admin/get-subscription/" + id, requestOptions)
     // response becomes response.json() 
     .then(response => response.json())
     // call back
     .then(function (data) {
+        console.log(data);
 
         if (data) {
             document.getElementById("order-no").innerHTML = data.id;
