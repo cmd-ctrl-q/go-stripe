@@ -7,7 +7,12 @@
 {{define "content"}}
 
 <h2 class="mt-5">{{index .StringMap "title"}}</h2>
+<span id="refunded" class="badge bg-danger d-none">Refunded</span>
+<span id="charged" class="badge bg-success d-none">Charged</span>
 <hr>
+
+<div id="messages" class="alert alert-danger text-center d-none"></div>
+
 <div>
     <strong>Order No:</strong> <span id="order-no"></span><br>
     <strong>Customer:</strong> <span id="customer"></span><br>
@@ -19,7 +24,7 @@
 <hr>
 
 <a href='{{index .StringMap "cancel"}}' class="btn btn-info">Cancel</a>
-<a id="refund-btn" href="#!" class="btn btn-warning">Refund Order</a>
+<a id="refund-btn" href="#!" class="btn btn-warning d-none">Refund Order</a>
 
 <input type="hidden" id="pi" value="">
 <input type="hidden" id="charge-amount" value="">
@@ -32,6 +37,21 @@
 <script>
     let token = localStorage.getItem("token"); 
     let id = window.location.pathname.split("/").pop();
+    let messages = document.getElementById("messages");
+
+    function showError(msg) {
+        messages.classList.add("alert-danger");
+        messages.classList.remove("alert-success");
+        messages.classList.remove("d-none");
+        messages.innerText = msg;
+    }
+
+    function showSuccess(msg) {
+        messages.classList.add("alert-success");
+        messages.classList.remove("alert-danger");
+        messages.classList.remove("d-none");
+        messages.innerText = msg;
+    }
 
     document.addEventListener("DOMContentLoaded", function() { 
 
@@ -60,6 +80,14 @@
                 document.getElementById("pi").value = data.transaction.payment_intent; 
                 document.getElementById("charge-amount").value = data.transaction.amount; 
                 document.getElementById("currency").value = data.transaction.currency;
+                // 1 = normal charge
+                if (data.status_id === 1) {
+                    document.getElementById("refund-btn").classList.remove("d-none");
+                    document.getElementById("charged").classList.remove("d-none");
+                } else {
+                    // refund charge
+                    document.getElementById("refunded").classList.remove("d-none");
+                }
             }
         })
     })
@@ -112,7 +140,16 @@
                 fetch("{{.API}}/api/admin/refund", requestOptions)
                 .then(response => response.json())
                 .then(function(data) {
-                    console.log(data);
+                    if (data.error) {
+                        showError(data.message);
+                    } else {
+                        // success 
+                        showSuccess("Charge refunded");
+                        // hide refund button 
+                        document.getElementById("refund-btn").classList.add("d-none");
+                        document.getElementById("refunded").classList.remove("d-none");
+                        document.getElementById("charged").classList.add("d-none");
+                    }
                 })
             }
         })
