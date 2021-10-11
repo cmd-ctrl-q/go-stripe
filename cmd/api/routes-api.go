@@ -38,6 +38,8 @@ func (app *application) routes() http.Handler {
 		r.Post("/all-subscriptions", app.AllSubscriptions)
 
 		r.Post("/get-sale/{id}", app.GetSale)
+
+		r.Post("/refund", app.RefundCharge)
 	})
 
 	return mux
