@@ -59,12 +59,12 @@ All Sales
                 newCell = newRow.insertCell();
                 let item = document.createTextNode(i.customer.last_name + ", " + i.customer.first_name);
                 newCell.appendChild(item);
-                
+
                 // populate third cell 
                 newCell = newRow.insertCell();
                 item = document.createTextNode(i.widget.name);
                 newCell.appendChild(item);
-                
+
                 // populate fourth cell 
                 let curr = formatCurrency(i.transaction.amount, i.transaction.currency);
                 newCell = newRow.insertCell();
@@ -73,7 +73,7 @@ All Sales
 
                 newCell = newRow.insertCell();
                 if (i.status_id !== 1) {
-                    newCell.innerHTML = `<span class="badge bg-danger">Refund</span>`
+                    newCell.innerHTML = `<span class="badge bg-danger">Refunded</span>`
                 } else {
                     newCell.innerHTML = `<span class="badge bg-success">Charged</span>`
                 }
