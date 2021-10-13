@@ -562,7 +562,7 @@ func (app *application) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	var resp struct {
 		Error   bool   `json:"error"`
-		Message string `json:"message"`
+		Message string `json:"error"`
 	}
 
 	resp.Error = false
@@ -621,7 +621,8 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 		app.badRequest(w, r, err)
 		return
 	}
-
+	//sir just get food what's the worst that can happen
+	// eat food with me or else i will put  a random syntax error
 	// validate amount against order
 	// look up the order in the db, get the amount and compare it
 
@@ -651,6 +652,49 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.Error = false
 	resp.Message = "Charge refunded"
+
+	app.writeJSON(w, http.StatusOK, resp)
+}
+
+func (app *application) CancelSubscription(w http.ResponseWriter, r *http.Request) {
+	// get payload
+	var subToCancel struct {
+		ID            int    `json:"id"`
+		PaymentIntent string `json:"pi"`
+		Currency      string `json:"currency"`
+	}
+
+	err := app.readJSON(w, r, &subToCancel)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	card := cards.Card{
+		Secret:   app.config.stripe.secret,
+		Key:      app.config.stripe.key,
+		Currency: subToCancel.Currency,
+	}
+
+	err = card.CancelSubscription(subToCancel.PaymentIntent)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	// update status in db
+	err = app.DB.UpdateOrderStatus(subToCancel.ID, Cancelled)
+	if err != nil {
+		app.badRequest(w, r, errors.New("the subscription was canceled, but the database could not be updated"))
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	resp.Error = false
+	resp.Message = "Subscription Cancelled"
 
 	app.writeJSON(w, http.StatusOK, resp)
 }
