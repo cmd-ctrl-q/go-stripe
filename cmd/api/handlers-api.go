@@ -18,6 +18,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	Cleared = 1 + iota
+	Refunded
+	Cancelled
+)
+
 type stripePayload struct {
 	Currency      string `json:"currency"`
 	Amount        string `json:"amount"`
@@ -627,6 +633,13 @@ func (app *application) RefundCharge(w http.ResponseWriter, r *http.Request) {
 	err = card.Refund(chargeToRefund.PaymentIntent, chargeToRefund.Amount)
 	if err != nil {
 		app.badRequest(w, r, err)
+		return
+	}
+
+	// update status in db
+	err = app.DB.UpdateOrderStatus(chargeToRefund.ID, Refunded)
+	if err != nil {
+		app.badRequest(w, r, errors.New("the charge was refunded but the database could not be updated"))
 		return
 	}
 
