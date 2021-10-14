@@ -7,7 +7,7 @@
 {{define "content"}}
 
 <h2 class="mt-5">{{index .StringMap "title"}}</h2>
-<span id="refunded" class="badge bg-danger d-none">Refunded</span>
+<span id="refunded" class="badge bg-danger d-none">{{index .StringMap "refunded-badge"}}</span>
 <span id="charged" class="badge bg-success d-none">Charged</span>
 <hr>
 
@@ -144,7 +144,7 @@
                         showError(data.message);
                     } else {
                         // success 
-                        showSuccess('{{index .StringMap "refund-success"}}');
+                        showSuccess('{{index .StringMap "refunded-msg"}}');
                         // hide refund button 
                         document.getElementById("refund-btn").classList.add("d-none");
                         document.getElementById("refunded").classList.remove("d-none");

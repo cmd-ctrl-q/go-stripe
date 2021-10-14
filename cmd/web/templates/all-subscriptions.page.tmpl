@@ -15,6 +15,7 @@ All Subscriptions
             <th>Customer</th>
             <th>Product</th>
             <th>Amount</th>
+            <th>Status</th>
         </tr>
         <tbody>
 
@@ -70,6 +71,13 @@ All Subscriptions
                 newCell = newRow.insertCell();
                 item = document.createTextNode(curr + "/month");
                 newCell.appendChild(item);
+
+                newCell = newRow.insertCell();
+                if (i.status_id !== 1) {
+                    newCell.innerHTML = `<span class="badge bg-danger">Canceled</span>`
+                } else {
+                    newCell.innerHTML = `<span class="badge bg-success">Active</span>`
+                }
             })
         } else {
             let newRow = tbody.insertRow();
