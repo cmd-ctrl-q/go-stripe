@@ -24,7 +24,7 @@
 <hr>
 
 <a href='{{index .StringMap "cancel"}}' class="btn btn-info">Cancel</a>
-<a id="refund-btn" href="#!" class="btn btn-warning d-none">Refund Order</a>
+<a id="refund-btn" href="#!" class="btn btn-warning d-none">{{index .StringMap "refund-btn"}}</a>
 
 <input type="hidden" id="pi" value="">
 <input type="hidden" id="charge-amount" value="">
@@ -110,7 +110,7 @@
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Refund'
+            confirmButtonText: '{{index .StringMap "refund-btn"}}'
         }).then((result) => {
             if (result.isConfirmed) {
 
@@ -136,15 +136,15 @@
                     },
                     body: JSON.stringify(payload),
                 }
-                
-                fetch("{{.API}}/api/admin/refund", requestOptions)
+
+                fetch('{{.API}}{{index .StringMap "refund-url"}}', requestOptions)
                 .then(response => response.json())
                 .then(function(data) {
                     if (data.error) {
                         showError(data.message);
                     } else {
                         // success 
-                        showSuccess("Charge refunded");
+                        showSuccess('{{index .StringMap "refund-success"}}');
                         // hide refund button 
                         document.getElementById("refund-btn").classList.add("d-none");
                         document.getElementById("refunded").classList.remove("d-none");
