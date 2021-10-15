@@ -22,12 +22,56 @@ All Sales
         </tbody>
     </thead>
 </table>
+
+<nav>
+    <ul id="paginator" class="pagination">
+
+    </ul>
+</nav>
 {{end}}
 
 {{define "js"}}
 <script>
+
+let currentPage = 1; // current page should be first page
+let pageSize = 5; // display 3 per page 
+
+function paginator(pages, currPage) {
+    let p = document.getElementById("paginator"); 
+
+    let html = `<li class="page-item"><a href="#!" class="page-link pager" data-page="${currPage - 1}">&lt;</a></li>`
+
+    for (var i = 0; i <= pages; i++) {
+        html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${i + 1}">${i + 1}</a></li>`
+    }
+
+    // next button 
+    html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${currPage + 1}">&gt;</a></li>`
+
+    // populate ul 
+    p.innerHTML = html;
+
+    let pageBtns = document.getElementsByClassName("pager");
+    for (var j = 0; j <= pageBtns.length; j++) {
+        // send user to next page on click 
+        pageBtns[j].addEventListener("click", function(e) {
+            let desiredPage = e.target.getAttribute("data-page");
+            console.log("Clicked, and data-page is", desiredPage);
+            if ((desiredPage > 0) && (desiredPage <= pages)) {
+                console.log("would go to page", desiredPage);
+            }
+        })
+    }
+}
+
+function updateTable(ps, cp) {
     let token = localStorage.getItem("token"); 
     let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+
+    let body = {
+        page_size: ps, 
+        page: cp, 
+    }
 
     const requestOptions = {
         method: 'post', 
@@ -36,6 +80,7 @@ All Sales
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token,
         }, 
+        body: JSON.stringify(body),
     }
 
     fetch("{{.API}}/api/admin/all-sales", requestOptions)
@@ -46,9 +91,9 @@ All Sales
         console.log(data);
 
         // check if no sales 
-        if (data) {
+        if (data.orders) {
 
-            data.forEach(function(i) {
+            data.orders.forEach(function(i) {
                 let newRow = tbody.insertRow();
                 let newCell = newRow.insertCell();
 
@@ -78,6 +123,7 @@ All Sales
                     newCell.innerHTML = `<span class="badge bg-success">Charged</span>`
                 }
             })
+            paginator(data.last_page, data.current_page);
         } else {
             let newRow = tbody.insertRow();
             let newCell = newRow.insertCell();
@@ -85,13 +131,20 @@ All Sales
             newCell.innerHTML = "No data available";
         }
     })
+}
 
-    function formatCurrency(amount, ticker) {
-        let c = parseFloat(amount/100);
-        return c.toLocaleString("en-US", {
-            style: "currency", 
-            currency: ticker.toUpperCase(),
-        });
-    }
+document.addEventListener("DOMContentLoaded", function() {
+
+    updateTable(pageSize, currentPage);
+})
+
+function formatCurrency(amount, ticker) {
+    let c = parseFloat(amount/100);
+    return c.toLocaleString("en-US", {
+        style: "currency", 
+        currency: ticker.toUpperCase(),
+    });
+}
+
 </script>
 {{end}}
