@@ -52,13 +52,12 @@ function paginator(pages, currPage) {
     p.innerHTML = html;
 
     let pageBtns = document.getElementsByClassName("pager");
-    for (var j = 0; j <= pageBtns.length; j++) {
+    for (var j = 0; j < pageBtns.length; j++) {
         // send user to next page on click 
         pageBtns[j].addEventListener("click", function(e) {
             let desiredPage = e.target.getAttribute("data-page");
-            console.log("Clicked, and data-page is", desiredPage);
-            if ((desiredPage > 0) && (desiredPage <= pages)) {
-                console.log("would go to page", desiredPage);
+            if ((desiredPage > 0) && (desiredPage <= pages + 1)) {
+                updateTable(pageSize, desiredPage);
             }
         })
     }
@@ -67,10 +66,11 @@ function paginator(pages, currPage) {
 function updateTable(ps, cp) {
     let token = localStorage.getItem("token"); 
     let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
+    tbody.innerHTML = "";
 
     let body = {
-        page_size: ps, 
-        page: cp, 
+        page_size: parseInt(ps, 10), 
+        page: parseInt(cp, 10), 
     }
 
     const requestOptions = {
@@ -88,7 +88,6 @@ function updateTable(ps, cp) {
     .then(response => response.json())
     // call back
     .then(function (data) {
-        console.log(data);
 
         // check if no sales 
         if (data.orders) {
@@ -127,7 +126,7 @@ function updateTable(ps, cp) {
         } else {
             let newRow = tbody.insertRow();
             let newCell = newRow.insertCell();
-            newCell.setAttribute("colspan", "4");
+            newCell.setAttribute("colspan", "5");
             newCell.innerHTML = "No data available";
         }
     })
