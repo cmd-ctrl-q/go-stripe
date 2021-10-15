@@ -392,9 +392,11 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page, isRecurring int) ([]*Ord
 	}
 
 	query = `
-		select count(o.id)
-		from orders o
-		left join widgets w on (o.widget_id = w.id)
+		select 
+			count(o.id)
+		from 
+			orders o
+			left join widgets w on (o.widget_id = w.id)
 		where
 			w.is_recurring = ?
 	`
