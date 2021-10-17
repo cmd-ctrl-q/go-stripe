@@ -436,12 +436,14 @@ func (app *application) ShowResetPassword(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// AllSales shows all sales page
 func (app *application) AllSales(w http.ResponseWriter, r *http.Request) {
 	if err := app.renderTemplate(w, r, "all-sales", &templateData{}); err != nil {
 		app.errorLog.Println(err)
 	}
 }
 
+// AllSubscriptions shows all subscription page
 func (app *application) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	if err := app.renderTemplate(w, r, "all-subscriptions", &templateData{}); err != nil {
 		app.errorLog.Println(err)
@@ -476,6 +478,20 @@ func (app *application) ShowSubscription(w http.ResponseWriter, r *http.Request)
 	if err := app.renderTemplate(w, r, "sale", &templateData{
 		StringMap: stringMap,
 	}); err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+// AllUsers shows the all users page
+func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
+	if err := app.renderTemplate(w, r, "all-users", &templateData{}); err != nil {
+		app.errorLog.Println(err)
+	}
+}
+
+// OneUser shows one admin user for add/edit/delete
+func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
+	if err := app.renderTemplate(w, r, "one-user", &templateData{}); err != nil {
 		app.errorLog.Println(err)
 	}
 }
