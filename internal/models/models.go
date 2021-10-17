@@ -682,9 +682,17 @@ func (m *DBModel) DeleteUser(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
+	// delete user from users table
 	stmt := `delete from users where id = ?`
 
 	_, err := m.DB.ExecContext(ctx, stmt, id)
+	if err != nil {
+		return err
+	}
+
+	// delete user from tokens table
+	stmt = "delete from tokens where user_id = ?"
+	_, err = m.DB.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
