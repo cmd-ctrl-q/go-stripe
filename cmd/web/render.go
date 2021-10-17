@@ -20,6 +20,7 @@ type templateData struct {
 
 	// When IsAuthenticated is set to 0, the user is not authenticated.
 	IsAuthenticated      int
+	UserID               int
 	API                  string // route to api
 	CssVersion           string
 	StripeSecretKey      string
@@ -47,8 +48,10 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	// check if value IsAuthenticated exists in session
 	if app.Session.Exists(r.Context(), "userID") {
 		td.IsAuthenticated = 1
+		td.UserID = app.Session.GetInt(r.Context(), "userID")
 	} else {
 		td.IsAuthenticated = 0
+		td.UserID = 0
 	}
 
 	return td
