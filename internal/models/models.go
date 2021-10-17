@@ -564,7 +564,7 @@ func (m *DBModel) GetAllUsers() ([]*User, error) {
 		from
 			users
 		order by 
-			lasst_name, first_naem
+			last_name, first_name
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query)

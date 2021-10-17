@@ -7,6 +7,45 @@ Admin User
 {{define "content"}}
 <h2 class="mt-5">Admin User</h2>
 
+<form method="post" action="" id="user_form" class="needs-validation" autocomplete="off" novalidate="">
+
+    <div class="mb-3">
+        <label for="first_name" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" required="" autocomplete="first_name-new">
+    </div>
+
+    <div class="mb-3">
+        <label for="last_name" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" required="" autocomplete="last_name-new">
+    </div>
+
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" required="" autocomplete="email-new">
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" autocomplete="password-new">
+    </div>
+
+    <div class="mb-3">
+        <label for="verify_password" class="form-label">Verify Password</label>
+        <input type="password" class="form-control" id="verify_password" name="verify_password" autocomplete="verify_password-new">
+    </div>
+
+    <hr>
+
+    <div class="float-start">
+        <!-- javascript:void(0) prevents the button from executing -->
+        <a href="javascript:void(0);" class="btn btn-primary" id="saveBtn">Save Changes</a>
+        <a href="/admin/all-users" class="btn btn-warning" id="cancelBtn">Cancel</a>
+    </div>
+    <!-- note: must end the float -->
+    <div class="float-end">
+        <a href="javascript:void(0);" class="btn btn-danger" id="deleteBtn">Delete</a>
+    </div>
+</form>
 {{end}}
 
 {{define "js"}}
