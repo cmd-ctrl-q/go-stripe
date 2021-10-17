@@ -750,11 +750,89 @@ func (app *application) CancelSubscription(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) AllUsers(w http.ResponseWriter, r *http.Request) {
-	allUses, err := app.DB.GetAllUsers()
+	allUsers, err := app.DB.GetAllUsers()
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, allUses)
+	app.writeJSON(w, http.StatusOK, allUsers)
+}
+
+func (app *application) OneUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	user, err := app.DB.GetOneUser(userID)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	app.writeJSON(w, http.StatusOK, user)
+}
+
+func (app *application) EditUser(w http.ResponseWriter, r *http.Request) {
+	// get id from url
+	id := chi.URLParam(r, "id")
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var user models.User
+
+	err = app.readJSON(w, r, &user)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	if userID > 0 {
+		// edit user
+		err = app.DB.EditUser(user)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+
+		if user.Password != "" {
+			newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+			if err != nil {
+				app.badRequest(w, r, err)
+				return
+			}
+
+			err = app.DB.UpdatePasswordForUser(user, string(newHash))
+			if err != nil {
+				app.badRequest(w, r, err)
+				return
+			}
+		}
+	} else {
+		// add user
+		newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+		err = app.DB.AddUser(user, string(newHash))
+		if err != nil {
+			app.badRequest(w, r, err)
+			return
+		}
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	app.writeJSON(w, http.StatusOK, resp)
 }
