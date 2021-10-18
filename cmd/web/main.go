@@ -116,6 +116,9 @@ func main() {
 		Session:       session,
 	}
 
+	// call websocket in background
+	go app.ListenToWsChannel()
+
 	// initialize web server
 	err = app.serve()
 	if err != nil {
