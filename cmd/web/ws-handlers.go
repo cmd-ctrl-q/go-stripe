@@ -17,6 +17,7 @@ type WsPayload struct {
 	Message     string              `json:"message"`
 	UserName    string              `json:"username"`
 	MessageType string              `json:"message_type"`
+	UserID      int                 `json:"user_id"`
 	Conn        WebSocketConnection `json:"-"`
 }
 
@@ -49,7 +50,7 @@ func (app *application) WsEndPoint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// write to log
-	app.infoLog.Println(fmt.Sprintf("Client connected from %s"), r.RemoteAddr)
+	app.infoLog.Println(fmt.Sprintf("Client connected from %s", r.RemoteAddr))
 
 	var resp WsJsonResponse
 	resp.Message = "Connected to server"
@@ -102,6 +103,7 @@ func (app *application) ListenToWsChannel() {
 			// tell end user to logout
 			resp.Action = "logout"
 			resp.Message = "Your account has been deleted"
+			resp.UserID = e.UserID
 			// broadcase to all clients
 			app.broadcastToAll(resp)
 
