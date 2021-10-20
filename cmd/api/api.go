@@ -34,6 +34,7 @@ type config struct {
 	frontend  string // address for frontend
 }
 
+// application shares data between handlers, etc.
 type application struct {
 	config   config
 	infoLog  *log.Logger
