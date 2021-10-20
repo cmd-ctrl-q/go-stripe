@@ -100,6 +100,7 @@ function val() {
             Swal.fire("Error: ", data.message);
         } else {
             // success
+            // redirect user
             location.href = "/admin/all-users";
         }
     })
@@ -163,6 +164,14 @@ delBtn.addEventListener("click", function() {
                 if (data.error) {
                     Swal.fire("Error: " + data.message);
                 } else {
+                    // data to send over ws 
+                    let jsonData = {
+                        action: "deleteUser", 
+                        user_id: parseInt(id, 10),
+                    }
+
+                    socket.send(JSON.stringify(jsonData));
+
                     location.href = "/admin/all-users";
                 }
             })
