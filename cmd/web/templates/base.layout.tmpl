@@ -95,6 +95,36 @@
 
   <script>
 
+    // connect user to websocket if logged in 
+    {{if eq .IsAuthenticated 1}}
+    document.addEventListener("DOMContentLoaded", function() {
+      // wss for prod, ws for dev
+      let socket = new WebSocket("ws:localhost:4000/ws")
+
+      socket.onopen = () => {
+        console.log("Successfully connected to websockets");
+      }
+
+      socket.onclose = event => {};
+
+      socket.onerror = error => {};
+
+      socket.onmessage = msg => {
+        let data = JSON.parse(msg.data);
+
+        switch (data.action) {
+          case "logout": 
+            if (data.user_id === {{.UserID}}) {
+              logout();
+            }
+            break;
+          default: 
+            break;
+        }
+      };
+    })
+    {{end}}
+
     function logout() {
       // remove items from local storage 
       localStorage.removeItem("token");
