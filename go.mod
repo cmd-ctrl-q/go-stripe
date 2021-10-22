@@ -11,6 +11,7 @@ require (
 	github.com/go-chi/cors v1.2.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/phpdave11/gofpdf v1.4.2 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/stripe/stripe-go/v72 v72.64.1
 	github.com/xhit/go-simple-mail/v2 v2.10.0 // indirect
