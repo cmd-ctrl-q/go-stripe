@@ -10,12 +10,12 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
-//go:embed templates
+//go:embed email-templates
 var emailTemplateFS embed.FS
 
-func (app *application) SendMail(from, to, subject, tmpl string, data interface{}) error {
+func (app *application) SendMail(from, to, subject, tmpl string, attachments []string, data interface{}) error {
 
-	templateToRender := fmt.Sprintf("templates/%s.html.tmpl", tmpl)
+	templateToRender := fmt.Sprintf("email-templates/%s.html.tmpl", tmpl)
 
 	// html template
 	t, err := template.New("email-html").ParseFS(emailTemplateFS, templateToRender)
@@ -36,7 +36,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	formattedMessage := tpl.String()
 
 	// plain text template
-	templateToRender = fmt.Sprintf("templates/%s.plain.tmpl", tmpl)
+	templateToRender = fmt.Sprintf("email-templates/%s.plain.tmpl", tmpl)
 	t, err = template.New("email-plain").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
 		app.errorLog.Println(err)
@@ -79,6 +79,13 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 
 	// set plain text body
 	email.AddAlternative(mail.TextPlain, plainMessage)
+
+	// add attachments
+	if len(attachments) > 0 {
+		for _, x := range attachments {
+			email.AddAttachment(x)
+		}
+	}
 
 	err = email.Send(smtpClient)
 	if err != nil {
