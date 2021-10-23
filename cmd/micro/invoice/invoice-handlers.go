@@ -18,19 +18,39 @@ type Order struct {
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
+	Items     []Product `json:"products"`
+}
+
+type Product struct {
+	Name   string `json:"name"`
+	Amount int    //
 }
 
 func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Request) {
 	// receive json
 	var order Order
 
-	err := app.readJSON(w, r, &order)
+	// err := app.readJSON(w, r, &order)
+	// if err != nil {
+	// 	app.badRequest(w, r, err)
+	// 	return
+	// }
+
+	order.ID = 100
+	order.Email = "me@here.com"
+	order.FirstName = "John"
+	order.LastName = "Wick"
+	order.Quantity = 1
+	order.Amount = 1000 // cents
+	order.Product = "Widget"
+	order.CreatedAt = time.Now()
+
+	// generate pdf invoice
+	err := app.createInvoicePDF(order)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
 	}
-
-	// generate pdf invoice
 
 	// create email
 
@@ -68,6 +88,7 @@ func (app *application) createInvoicePDF(order Order) error {
 	pdf.CellFormat(97, 8, order.Email, "", 0, "L", false, 0, "")
 	pdf.CellFormat(97, 8, order.CreatedAt.Format("2006-01-02"), "", 0, "L", false, 0, "")
 
+	// if more than one item, use for loop to range over the below
 	// populate product info in table
 	pdf.SetX(58)
 	pdf.SetY(93)

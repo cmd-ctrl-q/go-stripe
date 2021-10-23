@@ -53,7 +53,7 @@ func main() {
 		version:  version,
 	}
 
-	app.CreateDirIfNotExist("/invoices")
+	app.CreateDirIfNotExist("./invoices")
 
 	err := app.serve()
 	if err != nil {
