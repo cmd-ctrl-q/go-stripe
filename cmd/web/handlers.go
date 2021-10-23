@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -111,6 +113,18 @@ func (app *application) GetTransactionData(r *http.Request) (TransactionData, er
 	return txnData, nil
 }
 
+// Invoice contains information about an order
+type Invoice struct {
+	ID        int       `json:"id"`
+	Quantity  int       `json:"quantity"`
+	Amount    int       `json:"amount"`
+	Product   string    `json:"product"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // PaymentSucceeded displays the receipt page
 func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -171,10 +185,28 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 		UpdatedAt:     time.Now(),
 	}
 
-	_, err = app.SaveOrder(order)
+	orderID, err := app.SaveOrder(order)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
+	}
+
+	// call invoice microservice
+	inv := Invoice{
+		ID:        orderID,
+		Amount:    order.Amount,
+		Product:   "Widget", // get product name from DB?
+		Quantity:  order.Quantity,
+		FirstName: txnData.FirstName,
+		LastName:  txnData.LastName,
+		Email:     txnData.Email,
+		CreatedAt: time.Now(),
+	}
+
+	err = app.callInvoiceMicro(inv)
+	if err != nil {
+		app.errorLog.Println(err)
+		// no return here, continue to finish processing order
 	}
 
 	// Write data to session to prevent customer from being charged twice if they resubmit form
@@ -182,6 +214,39 @@ func (app *application) PaymentSucceeded(w http.ResponseWriter, r *http.Request)
 
 	// redirect user to another page
 	http.Redirect(w, r, "/receipt", http.StatusSeeOther)
+}
+
+func (app *application) callInvoiceMicro(inv Invoice) error {
+	// TODO: set as env variable
+	url := "http://localhost:5000/invoice/create-and-send"
+	out, err := json.MarshalIndent(inv, "", "\t")
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+
+	// set header
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	// send request to microservice
+	resp, err := client.Do(req)
+	if err != nil {
+		app.errorLog.Println(err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	app.infoLog.Println(resp.Body)
+
+	return nil
 }
 
 // VirtualTerminalPaymentSucceeded displays the receipt page for virtual terminal transactions

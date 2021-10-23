@@ -13,7 +13,7 @@ import (
 //go:embed email-templates
 var emailTemplateFS embed.FS
 
-func (app *application) SendMail(from, to, subject, tmpl string, attachments []string, data interface{}) error {
+func (app *application) SendMail(from, to, subject, tmpl string, attachments map[string]string, data interface{}) error {
 
 	templateToRender := fmt.Sprintf("email-templates/%s.html.tmpl", tmpl)
 
@@ -82,8 +82,12 @@ func (app *application) SendMail(from, to, subject, tmpl string, attachments []s
 
 	// add attachments
 	if len(attachments) > 0 {
-		for _, x := range attachments {
-			email.AddAttachment(x)
+		for k, v := range attachments {
+			f := &mail.File{
+				FilePath: v,
+				Name:     k,
+			}
+			email.Attach(f)
 		}
 	}
 

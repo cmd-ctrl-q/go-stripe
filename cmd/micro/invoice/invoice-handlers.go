@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/phpdave11/gofpdf"
@@ -18,12 +19,6 @@ type Order struct {
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
-	Items     []Product `json:"products"`
-}
-
-type Product struct {
-	Name   string `json:"name"`
-	Amount int    //
 }
 
 func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +39,11 @@ func (app *application) CreateAndSendInvoice(w http.ResponseWriter, r *http.Requ
 	}
 
 	// create email attachment
-	attachments := []string{
-		fmt.Sprintf("./invoices/%d.pdf", order.ID),
-	}
+	// attachments := []string{
+	// 	fmt.Sprintf("./invoices/%d.pdf", order.ID),
+	// }
+	attachments := make(map[string]string)
+	attachments[strconv.Itoa(order.ID)] = fmt.Sprintf("./invoices/%d.pdf", order.ID)
 
 	// send mail with attachment
 	err = app.SendMail("info@widgets.com", order.Email, "Your invoice", "invoice", attachments, nil)

@@ -56,7 +56,7 @@ type Order struct {
 	UpdatedAt     time.Time   `json:"-"`
 	Widget        Widget      `json:"widget"`
 	Transaction   Transaction `json:"transaction"`
-	Customer      Customer    `json:"customer"`
+	Customer      Customer    `json:"-"`
 }
 
 // Status is the type for statuses
