@@ -244,8 +244,6 @@ func (app *application) callInvoiceMicro(inv Invoice) error {
 	}
 	defer resp.Body.Close()
 
-	app.infoLog.Println(resp.Body)
-
 	return nil
 }
 

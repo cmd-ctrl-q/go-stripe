@@ -97,7 +97,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, attachments map
 		return err
 	}
 
-	app.infoLog.Println("send mail")
+	app.infoLog.Println("mail sent")
 
 	return nil
 }

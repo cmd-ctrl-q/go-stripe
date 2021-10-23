@@ -92,7 +92,6 @@ func (app *application) createInvoicePDF(order Order) error {
 	pdf.SetX(166)
 	pdf.CellFormat(20, 8, fmt.Sprintf("%d", order.Quantity), "", 0, "L", false, 0, "")
 	pdf.SetX(185)
-	app.infoLog.Println("Amount: ", order.Amount)
 	pdf.CellFormat(20, 8, fmt.Sprintf("$%.2f", float32(order.Amount/100.0)), "", 0, "R", false, 0, "")
 
 	// export as pdf
