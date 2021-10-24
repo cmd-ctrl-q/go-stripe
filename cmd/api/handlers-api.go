@@ -166,8 +166,8 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 
 	// validate data
 	v := validator.New()
-	v.Check(len(data.FirstName) < 3, "first_name", "must be at least 2 characters")
-	v.Check(data.LastName == "", "last_name", "must not be empty")
+	v.Check(len(data.FirstName) > 1, "first_name", "must be at least 2 characters")
+	v.Check(data.LastName != "", "last_name", "must not be empty")
 
 	if !v.Valid() {
 		app.failedValidation(w, r, v.Errors)
